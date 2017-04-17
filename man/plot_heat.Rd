@@ -4,10 +4,13 @@
 \alias{plot_heat}
 \title{Plot heat map of variable distributions within each cluster}
 \usage{
-plot_heat(x, col, cutoff = 1, cluster_rows = TRUE, cluster_cols = FALSE)
+plot_heat(x, k, col, cutoff = 1, cluster_rows = TRUE,
+  cluster_cols = FALSE)
 }
 \arguments{
 \item{x}{object obtained from \code{\link{get_kmeans}}}
+
+\item{k}{number of clusters to use}
 
 \item{col}{name of variable to plot (either categorical or sliced numeric variable in the data)}
 

@@ -1,6 +1,7 @@
 #' Plot heat map of variable distributions within each cluster
 #'
 #' @param x object obtained from \code{\link{get_kmeans}}
+#' @param k number of clusters to use
 #' @param col name of variable to plot (either categorical or sliced numeric variable in the data)
 #' @param cutoff minimum number of series that must be present for a level of the variable to be included in the plot
 #' @param cluster_rows should the rows be clustered in the \code{\link{pheatmap}} plot?
@@ -10,15 +11,18 @@
 #' @importFrom pheatmap pheatmap
 #' @importFrom grDevices colorRampPalette
 #' @importFrom RColorBrewer brewer.pal
-plot_heat <- function(x, col, cutoff = 1, cluster_rows = TRUE, cluster_cols = FALSE) {
+plot_heat <- function(x, k, col, cutoff = 1, cluster_rows = TRUE, cluster_cols = FALSE) {
 
   dat <- join_data_with_cluster(x, k)
 
   clmns <- c(col, "cluster_name")
 
   tmp <- dat %>%
+    dplyr::group_by_(.dots = union(clmns, x$group_vars)) %>%
+    dplyr::mutate(denom = n()) %>%
+    dplyr::ungroup() %>%
     dplyr::group_by_(.dots = clmns) %>%
-    dplyr::summarise(n = n()) %>%
+    dplyr::summarise(n = n() / denom[1]) %>%
     dplyr::ungroup() %>%
     dplyr::group_by_(col) %>%
     dplyr::mutate_(pct_cluster = ~ 100 * n / sum(n)) %>%

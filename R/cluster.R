@@ -67,7 +67,7 @@ join_data_with_cluster <- function(x, k) {
   clust_meds <- as.numeric(apply(x$kmeans[[k]]$centers, 1, function(x) median(x, na.rm = TRUE)))
 
   gps$cluster <- x$kmeans[[k]]$cluster
-  gps$cluster_name <- rank(clust_meds)[x$kmeans[[k]]$cluster]
+  gps$cluster_name <- rank(clust_meds, ties.method = "first")[x$kmeans[[k]]$cluster]
   gps$size <- x$kmeans[[k]]$size[x$kmeans[[k]]$cluster]
   gps$id <- seq_len(nrow(gps))
 
@@ -91,7 +91,7 @@ plot_clust <- function(x, k, centroid = TRUE, xlab = NULL, ylab = NULL, ...) {
 
   clustdat <- dat %>%
     dplyr::select(one_of(c("x", "y", "cluster", "cluster_name", "size", "id"))) %>%
-    dplyr::mutate(cluster2 = sprintf("%d (n=%d)", cluster_name, size))
+    dplyr::mutate(cluster2 = paste0(cluster_name, " (n=", size, ")"))
 
   xrange <- range(clustdat$x, na.rm = TRUE)
   yrange <- range(clustdat$y, na.rm = TRUE)
@@ -128,12 +128,24 @@ plot_clust <- function(x, k, centroid = TRUE, xlab = NULL, ylab = NULL, ...) {
   )
 }
 
-# get_centroid_data <- function(x, k) {
-#   tmp <- dplyr::data_frame(x = x, y = y) %>%
-#     dplyr::group_by(x) %>%
-#     dplyr::summarise(y = median(y, na.rm = TRUE))
+#' Compute the centroids for a given clustering
+#'
+#' @param x object obtained from \code{\link{get_kmeans}}
+#' @param k number of clusters to use
+#' @param use_median should median be used instead of mean to compute the centroid?
+#' @export
+get_centroid_data <- function(x, k, use_median = FALSE) {
+  dat <- join_data_with_cluster(x, k) %>%
+    rename_(.dots = c(setNames(x$x, "x"), setNames(x$y, "y"))) %>%
+    select_("x", "y", "cluster", "cluster_name")
 
-# }
+  fn <- ifelse(use_median, median, mean)
+
+  dat %>%
+    dplyr::group_by_("cluster", "cluster_name", "x") %>%
+    dplyr::summarise(y = fn(y, na.rm = TRUE)) %>%
+    rename_(.dots = c(setNames("x", x$x), setNames("y", x$y)))
+}
 
 # plot_centroids <- function(dat, km) {
 

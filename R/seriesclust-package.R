@@ -1,5 +1,5 @@
 utils::globalVariables(c("var", "cluster_name", "size", "k",
-  "pct_cluster", "val", "nn", "k", "wss"))
+  "pct_cluster", "val", "nn", "k", "wss", "y", "denom"))
 
 #' @import rbokeh
 #' @import lattice
