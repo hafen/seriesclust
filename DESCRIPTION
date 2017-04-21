@@ -9,13 +9,14 @@ Encoding: UTF-8
 LazyData: true
 Imports:
     LICORS,
-    RColorBrewer,
+    viridis,
     dplyr,
     lattice,
-    pheatmap,
+    d3heatmap,
     purrr,
     rbokeh,
-    tidyr
+    tidyr,
+    magrittr
 Suggests:
     testthat,
     covr,

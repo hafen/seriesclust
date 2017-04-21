@@ -4,7 +4,8 @@
 \alias{plot_clust}
 \title{Plot clustered series}
 \usage{
-plot_clust(x, k, centroid = TRUE, xlab = NULL, ylab = NULL, ...)
+plot_clust(x, k, centroid = TRUE, xlab = NULL, ylab = NULL,
+  use_median = FALSE, ...)
 }
 \arguments{
 \item{x}{object obtained from \code{\link{get_kmeans}}}
@@ -17,8 +18,29 @@ plot_clust(x, k, centroid = TRUE, xlab = NULL, ylab = NULL, ...)
 
 \item{ylab}{y-axis label}
 
+\item{use_median}{should median be used instead of mean to compute the centroid?}
+
 \item{\ldots}{additional parameters passed on to \code{\link{xyplot}}}
 }
 \description{
 Plot clustered series
+}
+\examples{
+\dontrun{
+library(dplyr)
+
+# scale the monthly median close price so that we are clustering on general shape
+d <- nasd16 \%>\%
+  group_by(symbol) \%>\%
+  mutate(close_scl = scale(med_close)) \%>\%
+  select(-company, -med_close)
+
+set.seed(1234)
+# k-means clustering with 2, 5, and 9 clusters
+km <- get_kmeans(d, x = "month", y = "close_scl", k = c(2, 5, 9))
+plot_scree(km)
+plot_clust(km, 9)
+plot_heat(km, 9, col = "sector")
+plot_heat(km, 9, col = "industry", cutoff = 10)
+}
 }

@@ -4,7 +4,7 @@
 \alias{get_kmeans}
 \title{Get a set k-means++ clusters for a collection of series}
 \usage{
-get_kmeans(dat, x, y, groups = NULL, nk = 20)
+get_kmeans(dat, x, y, groups = NULL, k = 2:20)
 }
 \arguments{
 \item{dat}{data frame}
@@ -13,10 +13,29 @@ get_kmeans(dat, x, y, groups = NULL, nk = 20)
 
 \item{y}{string name of y variable}
 
-\item{groups}{a character vector of grouping variable names}
+\item{groups}{a character vector of grouping variable names - if not specified, all columns that are not \code{x} or \code{y} will be treated as grouping variables}
 
-\item{nk}{number of clusters to run through (result be a set of clusters wit k = 2:nk)}
+\item{k}{vector of number of clusters to run through}
 }
 \description{
 Get a set k-means++ clusters for a collection of series
+}
+\examples{
+\dontrun{
+library(dplyr)
+
+# scale the monthly median close price so that we are clustering on general shape
+d <- nasd16 \%>\%
+  group_by(symbol) \%>\%
+  mutate(close_scl = scale(med_close)) \%>\%
+  select(-company, -med_close)
+
+set.seed(1234)
+# k-means clustering with 2, 5, and 9 clusters
+km <- get_kmeans(d, x = "month", y = "close_scl", k = c(2, 5, 9))
+plot_scree(km)
+plot_clust(km, 9)
+plot_heat(km, 9, col = "sector")
+plot_heat(km, 9, col = "industry", cutoff = 10)
+}
 }

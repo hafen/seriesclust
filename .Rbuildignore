@@ -3,3 +3,5 @@
 ^\.travis\.yml$
 ^codecov\.yml$
 ^\.lintr
+^_ignore
+^man-roxygen

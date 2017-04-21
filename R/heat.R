@@ -4,14 +4,16 @@
 #' @param k number of clusters to use
 #' @param col name of variable to plot (either categorical or sliced numeric variable in the data)
 #' @param cutoff minimum number of series that must be present for a level of the variable to be included in the plot
-#' @param cluster_rows should the rows be clustered in the \code{\link{pheatmap}} plot?
-#' @param cluster_cols should the columns be clustered in the \code{\link{pheatmap}} plot?
+#' @param cluster_rows should the rows be clustered in the \code{\link[d3heatmap]{d3heatmap}} plot?
+#' @param cluster_cols should the columns be clustered in the \code{\link[d3heatmap]{d3heatmap}} plot?
+#' @param color a vector of colors or a color ramp function
 #' @export
+#' @example man-roxygen/ex-clust.R
 #' @importFrom tidyr crossing_
-#' @importFrom pheatmap pheatmap
-#' @importFrom grDevices colorRampPalette
-#' @importFrom RColorBrewer brewer.pal
-plot_heat <- function(x, k, col, cutoff = 1, cluster_rows = TRUE, cluster_cols = FALSE) {
+#' @importFrom d3heatmap d3heatmap
+#' @importFrom viridis magma
+plot_heat <- function(x, k, col, cutoff = 1, cluster_rows = TRUE, cluster_cols = TRUE,
+  color = viridis::magma) {
 
   dat <- join_data_with_cluster(x, k)
 
@@ -43,9 +45,24 @@ plot_heat <- function(x, k, col, cutoff = 1, cluster_rows = TRUE, cluster_cols =
   rownames(mt) <- as.character(unique(tmp$val))
   colnames(mt) <- as.character(unique(tmp$cluster_name))
 
-  pheatmap::pheatmap(mt,
-    color = grDevices::colorRampPalette(RColorBrewer::brewer.pal(n = 7, name = "YlOrRd"))(100),
-    cluster_cols = cluster_cols,
-    cluster_rows = cluster_rows,
-    annotation_colors = "red")
+  if (is.function(color))
+    color <- color(100)
+
+  mt2 <- matrix(paste0(tmp$n, " of ", tmp$nn, " '", tmp[[col]], "' series (",
+    round(tmp$pct_cluster, 1), "%) are in cluster ",
+    tmp$cluster_name), nrow = length(unique(tmp[[col]])))
+
+  mnc_row <- max(nchar(rownames(mt)))
+  mnc_col <- max(nchar(colnames(mt)))
+# browser()
+  d3heatmap::d3heatmap(round(mt, 1), colors = color, cellnote = mt2,
+    yaxis_width = mnc_row ^ (1 / 3) * 100, xaxis_height = mnc_col * 40)
+
+  # pheatmap::pheatmap(mt,
+  #   color = color,
+  #   # color = grDevices::colorRampPalette(RColorBrewer::brewer.pal(n = 7, name = "YlOrRd"))(100),
+  #   cluster_cols = cluster_cols,
+  #   cluster_rows = cluster_rows,
+  #   annotation_colors = "red",
+  #   border_color = "#ffffff50")
 }
