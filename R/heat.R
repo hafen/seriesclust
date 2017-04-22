@@ -4,16 +4,16 @@
 #' @param k number of clusters to use
 #' @param col name of variable to plot (either categorical or sliced numeric variable in the data)
 #' @param cutoff minimum number of series that must be present for a level of the variable to be included in the plot
-#' @param cluster_rows should the rows be clustered in the \code{\link[d3heatmap]{d3heatmap}} plot?
-#' @param cluster_cols should the columns be clustered in the \code{\link[d3heatmap]{d3heatmap}} plot?
 #' @param color a vector of colors or a color ramp function
+#' @param xaxis_height,yaxis_width size of axes, in pixels
+#' @param \ldots parameters passed on to \code{\link[d3heatmap]{d3heatmap}}
 #' @export
 #' @example man-roxygen/ex-clust.R
 #' @importFrom tidyr crossing_
 #' @importFrom d3heatmap d3heatmap
 #' @importFrom viridis magma
-plot_heat <- function(x, k, col, cutoff = 1, cluster_rows = TRUE, cluster_cols = TRUE,
-  color = viridis::magma) {
+plot_heat <- function(x, k, col, cutoff = 1, color = viridis::magma,
+  xaxis_height = NULL, yaxis_width = NULL, ...) {
 
   dat <- join_data_with_cluster(x, k)
 
@@ -52,11 +52,18 @@ plot_heat <- function(x, k, col, cutoff = 1, cluster_rows = TRUE, cluster_cols =
     round(tmp$pct_cluster, 1), "%) are in cluster ",
     tmp$cluster_name), nrow = length(unique(tmp[[col]])))
 
-  mnc_row <- max(nchar(rownames(mt)))
-  mnc_col <- max(nchar(colnames(mt)))
-# browser()
+  if (is.null(yaxis_width)) {
+    mnc_row <- max(nchar(rownames(mt)))
+    yaxis_width <- mnc_row ^ (1 / 3) * 100
+  }
+
+  if (is.null(xaxis_height)) {
+    mnc_col <- max(nchar(colnames(mt)))
+    xaxis_height <- mnc_col * 40
+  }
+
   d3heatmap::d3heatmap(round(mt, 1), colors = color, cellnote = mt2,
-    yaxis_width = mnc_row ^ (1 / 3) * 100, xaxis_height = mnc_col * 40)
+    yaxis_width = yaxis_width, xaxis_height = xaxis_height, ...)
 
   # pheatmap::pheatmap(mt,
   #   color = color,

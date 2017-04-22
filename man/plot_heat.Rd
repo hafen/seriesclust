@@ -4,8 +4,8 @@
 \alias{plot_heat}
 \title{Plot heat map of variable distributions within each cluster}
 \usage{
-plot_heat(x, k, col, cutoff = 1, cluster_rows = TRUE, cluster_cols = TRUE,
-  color = viridis::magma)
+plot_heat(x, k, col, cutoff = 1, color = viridis::magma,
+  xaxis_height = NULL, yaxis_width = NULL, ...)
 }
 \arguments{
 \item{x}{object obtained from \code{\link{get_kmeans}}}
@@ -16,11 +16,11 @@ plot_heat(x, k, col, cutoff = 1, cluster_rows = TRUE, cluster_cols = TRUE,
 
 \item{cutoff}{minimum number of series that must be present for a level of the variable to be included in the plot}
 
-\item{cluster_rows}{should the rows be clustered in the \code{\link[d3heatmap]{d3heatmap}} plot?}
-
-\item{cluster_cols}{should the columns be clustered in the \code{\link[d3heatmap]{d3heatmap}} plot?}
-
 \item{color}{a vector of colors or a color ramp function}
+
+\item{xaxis_height, yaxis_width}{size of axes, in pixels}
+
+\item{\ldots}{parameters passed on to \code{\link[d3heatmap]{d3heatmap}}}
 }
 \description{
 Plot heat map of variable distributions within each cluster
