@@ -93,12 +93,14 @@ join_data_with_cluster <- function(x, k) {
 #' @param centroid should centroids be overlaid?
 #' @param xlab x-axis label
 #' @param ylab y-axis label
+#' @param alpha alpha to use for lines
 #' @param use_median should median be used instead of mean to compute the centroid?
 #' @param \ldots additional parameters passed on to \code{\link{xyplot}}
 #' @export
 #' @example man-roxygen/ex-clust.R
 #' @importFrom tidyr unnest
-plot_clust <- function(x, k, centroid = TRUE, xlab = NULL, ylab = NULL, use_median = FALSE, ...) {
+plot_clust <- function(x, k, centroid = TRUE, xlab = NULL, ylab = NULL, alpha = 0.3,
+  use_median = FALSE, ...) {
 
   dat <- join_data_with_cluster(x, k) %>%
     rename_(.dots = c(setNames(x$x, "x"), setNames(x$y, "y")))
@@ -106,6 +108,11 @@ plot_clust <- function(x, k, centroid = TRUE, xlab = NULL, ylab = NULL, use_medi
   clustdat <- dat %>%
     dplyr::select(one_of(c("x", "y", "cluster", "cluster_name", "size", "id"))) %>%
     dplyr::mutate(cluster2 = paste0(cluster_name, " (n=", size, ")"))
+    # %>%
+    # group_by(id) %>% do({
+    #   tmp <- tail(., 1); tmp$x <- NA; tmp$y <- NA
+    #   rbind(., tmp)
+    # })
 
   xrange <- range(clustdat$x, na.rm = TRUE)
   yrange <- range(clustdat$y, na.rm = TRUE)
@@ -114,7 +121,7 @@ plot_clust <- function(x, k, centroid = TRUE, xlab = NULL, ylab = NULL, use_medi
   sizemax <- max(clustdat$size)
 
   lattice::xyplot(y ~ x | factor(cluster_name), groups = id, data = clustdat,
-    type = c("l", "g"), alpha = 0.3, col = "black",
+    type = c("l", "g"), alpha = alpha, col = "black",
     panel = function(x, y, subscripts, groups, ...) {
       txt <- clustdat$cluster2[subscripts][1]
       sz <- clustdat$size[subscripts][1]

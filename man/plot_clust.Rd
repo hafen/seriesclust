@@ -4,7 +4,7 @@
 \alias{plot_clust}
 \title{Plot clustered series}
 \usage{
-plot_clust(x, k, centroid = TRUE, xlab = NULL, ylab = NULL,
+plot_clust(x, k, centroid = TRUE, xlab = NULL, ylab = NULL, alpha = 0.3,
   use_median = FALSE, ...)
 }
 \arguments{
@@ -17,6 +17,8 @@ plot_clust(x, k, centroid = TRUE, xlab = NULL, ylab = NULL,
 \item{xlab}{x-axis label}
 
 \item{ylab}{y-axis label}
+
+\item{alpha}{alpha to use for lines}
 
 \item{use_median}{should median be used instead of mean to compute the centroid?}
 
@@ -39,7 +41,6 @@ set.seed(1234)
 # k-means clustering with 2, 5, and 9 clusters
 km <- get_kmeans(d, x = "month", y = "close_scl", k = c(2, 5, 9))
 plot_scree(km)
-plot_clust(km, 9)
 plot_heat(km, 9, col = "sector")
 plot_heat(km, 9, col = "sector", interactive = FALSE)
 plot_heat(km, 9, col = "industry", cutoff = 10)
