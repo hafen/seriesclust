@@ -46,7 +46,6 @@ get_kmeans <- function(dat, x, y, groups = NULL, k = 2:20) {
 }
 
 # df_to_clust_matrix <- function(dat, x, y, groups = NULL) {
-
 # }
 
 #' Scree plot

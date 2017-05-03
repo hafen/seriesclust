@@ -36,6 +36,7 @@ km <- get_kmeans(d, x = "month", y = "close_scl", k = c(2, 5, 9))
 plot_scree(km)
 plot_clust(km, 9)
 plot_heat(km, 9, col = "sector")
+plot_heat(km, 9, col = "sector", interactive = FALSE)
 plot_heat(km, 9, col = "industry", cutoff = 10)
 }
 }

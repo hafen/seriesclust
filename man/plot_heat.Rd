@@ -5,7 +5,7 @@
 \title{Plot heat map of variable distributions within each cluster}
 \usage{
 plot_heat(x, k, col, cutoff = 1, color = viridis::magma,
-  xaxis_height = NULL, yaxis_width = NULL, ...)
+  xaxis_height = NULL, yaxis_width = NULL, interactive = TRUE, ...)
 }
 \arguments{
 \item{x}{object obtained from \code{\link{get_kmeans}}}
@@ -18,9 +18,11 @@ plot_heat(x, k, col, cutoff = 1, color = viridis::magma,
 
 \item{color}{a vector of colors or a color ramp function}
 
-\item{xaxis_height, yaxis_width}{size of axes, in pixels}
+\item{xaxis_height, yaxis_width}{size of axes, in pixels (ignored if \code{interactive = FALSE})}
 
-\item{\ldots}{parameters passed on to \code{\link[d3heatmap]{d3heatmap}}}
+\item{interactive}{if \code{TRUE}, \code{\link[d3heatmap]{d3heatmap}} will be used, else \code{\link[pheatmap]{pheatmap}}}
+
+\item{\ldots}{parameters passed on to \code{\link[d3heatmap]{d3heatmap}} or \code{\link[pheatmap]{pheatmap}}}
 }
 \description{
 Plot heat map of variable distributions within each cluster
@@ -41,6 +43,7 @@ km <- get_kmeans(d, x = "month", y = "close_scl", k = c(2, 5, 9))
 plot_scree(km)
 plot_clust(km, 9)
 plot_heat(km, 9, col = "sector")
+plot_heat(km, 9, col = "sector", interactive = FALSE)
 plot_heat(km, 9, col = "industry", cutoff = 10)
 }
 }
