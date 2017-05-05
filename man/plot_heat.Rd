@@ -5,7 +5,8 @@
 \title{Plot heat map of variable distributions within each cluster}
 \usage{
 plot_heat(x, k, col, cutoff = 1, color = viridis::magma,
-  xaxis_height = NULL, yaxis_width = NULL, interactive = TRUE, ...)
+  xaxis_height = NULL, yaxis_width = NULL, interactive = TRUE,
+  annotation_labs = NULL, ...)
 }
 \arguments{
 \item{x}{object obtained from \code{\link{get_kmeans}}}
@@ -21,6 +22,8 @@ plot_heat(x, k, col, cutoff = 1, color = viridis::magma,
 \item{xaxis_height, yaxis_width}{size of axes, in pixels (ignored if \code{interactive = FALSE})}
 
 \item{interactive}{if \code{TRUE}, \code{\link[d3heatmap]{d3heatmap}} will be used, else \code{\link[pheatmap]{pheatmap}}}
+
+\item{annotation_labs}{a vector of labels to use to annotate column groupings if using \code{\link[pheatmap]{pheatmap}}}
 
 \item{\ldots}{parameters passed on to \code{\link[d3heatmap]{d3heatmap}} or \code{\link[pheatmap]{pheatmap}}}
 }
@@ -44,6 +47,9 @@ plot_scree(km)
 plot_heat(km, 9, col = "sector")
 plot_heat(km, 9, col = "sector", interactive = FALSE,
   display_numbers = TRUE, cutree_cols = 3, cutree_rows = 3)
+plot_heat(km, 9, col = "industry", interactive = FALSE,
+  display_numbers = TRUE, cutree_cols = 3, cutree_rows = 3,
+  annotation_labs = c("A", "B", "C"))
 plot_heat(km, 9, col = "industry", cutoff = 20)
 }
 }

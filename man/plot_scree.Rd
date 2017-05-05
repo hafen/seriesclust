@@ -31,6 +31,9 @@ plot_scree(km)
 plot_heat(km, 9, col = "sector")
 plot_heat(km, 9, col = "sector", interactive = FALSE,
   display_numbers = TRUE, cutree_cols = 3, cutree_rows = 3)
+plot_heat(km, 9, col = "industry", interactive = FALSE,
+  display_numbers = TRUE, cutree_cols = 3, cutree_rows = 3,
+  annotation_labs = c("A", "B", "C"))
 plot_heat(km, 9, col = "industry", cutoff = 20)
 }
 }

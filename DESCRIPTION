@@ -1,6 +1,6 @@
 Package: seriesclust
 Title: Cluster Data Series
-Version: 0.1.1
+Version: 0.1.2
 Authors@R: person("Ryan", "Hafen", email = "rhafen@gmail.com", role = c("aut", "cre"))
 Description: This package provides a few simple tools to cluster series of data and investigate the results with respect to cluster membership across other variables in the data.
 Depends: R (>= 3.3.2)

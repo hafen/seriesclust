@@ -6,16 +6,19 @@
 #' @param cutoff minimum number of series that must be present for a level of the variable to be included in the plot
 #' @param color a vector of colors or a color ramp function
 #' @param xaxis_height,yaxis_width size of axes, in pixels (ignored if \code{interactive = FALSE})
-#' @param \ldots parameters passed on to \code{\link[d3heatmap]{d3heatmap}} or \code{\link[pheatmap]{pheatmap}}
 #' @param interactive if \code{TRUE}, \code{\link[d3heatmap]{d3heatmap}} will be used, else \code{\link[pheatmap]{pheatmap}}
+#' @param annotation_labs a vector of labels to use to annotate column groupings if using \code{\link[pheatmap]{pheatmap}}
+#' @param \ldots parameters passed on to \code{\link[d3heatmap]{d3heatmap}} or \code{\link[pheatmap]{pheatmap}}
 #' @export
 #' @example man-roxygen/ex-clust.R
 #' @importFrom tidyr crossing_
 #' @importFrom d3heatmap d3heatmap
 #' @importFrom pheatmap pheatmap
 #' @importFrom viridis magma
+#' @importFrom stats cutree
 plot_heat <- function(x, k, col, cutoff = 1, color = viridis::magma,
-  xaxis_height = NULL, yaxis_width = NULL, interactive = TRUE, ...) {
+  xaxis_height = NULL, yaxis_width = NULL, interactive = TRUE,
+  annotation_labs = NULL, ...) {
 
   dat <- join_data_with_cluster(x, k)
   clmns <- c(col, "cluster_name")
@@ -91,7 +94,36 @@ plot_heat <- function(x, k, col, cutoff = 1, color = viridis::magma,
     obj <- do.call(pheatmap::pheatmap, pars)
     pars$silent <- FALSE
 
-    res <- list(obj = obj, pars = pars)
+    cluster_groups <- NULL
+    if (!is.null(annotation_labs)) {
+      if (is.null(pars$cutree_cols)) {
+        message("Cannot use 'annotation_labs' if 'cutree_cols' is not specified")
+      } else if (length(annotation_labs) == pars$cutree_cols) {
+        tmp <- cutree(obj$tree_col, pars$cutree_cols)
+        # roundabout way to reorder the tree indices to the order they appear in the plot
+        tmp <- tmp[as.character(obj$tree_col$order)]
+        tmp2 <- as.integer(factor(tmp, levels = unique(tmp)))
+        acol <- data.frame(group = annotation_labs[tmp2], stringsAsFactors = FALSE)
+        rownames(acol) <- names(tmp)
+        pars$annotation_col <- acol
+        tableau10 <- c("#1F77B4", "#FF7F0E", "#2CA02C", "#D62728", "#9467BD",
+          "#8C564B", "#E377C2", "#7F7F7F", "#BCBD22", "#17BECF")
+        cols <- tableau10[(seq_along(annotation_labs) - 1) %% 10 + 1]
+        names(cols) <- annotation_labs
+        pars$annotation_colors <- list(group = cols)
+
+        cluster_groups <- data.frame(
+          group = acol$group,
+          cluster_name = rownames(acol),
+          stringsAsFactors = FALSE)
+      } else {
+        message(
+          "Did not add annotations because 'annotation_labs' ",
+          "was not the same length as 'cutree_cols'")
+      }
+    }
+
+    res <- list(obj = obj, pars = pars, cluster_groups = cluster_groups)
     class(res) <- c("pheatmap_plot", class(res))
   }
   res
@@ -122,9 +154,3 @@ print.pheatmap_plot <- function(x, ...) {
   if (!is.null(ylab))
     grid::grid.text(ylab, x = -0.02, rot = 90, gp = grid::gpar(fontsize = 14))
 }
-
-# plot_heat(km, 9, col = "sector", interactive = FALSE,
-#   display_numbers = TRUE, cutree_cols = 3, cutree_rows = 3, annotation_col = tmpd, annotation_colors = list(group = c("1" = "red", "2" = "green", "3" = "blue")))
-# tmp <- cutree(p$obj$tree_col, 3)
-# tmpd <- data.frame(group = as.character(tmp), stringsAsFactors = FALSE)
-# rownames(tmpd) <- names(tmp)
