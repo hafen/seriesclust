@@ -6,7 +6,7 @@
 #' @param groups a character vector of grouping variable names - if not specified, all columns that are not \code{x} or \code{y} will be treated as grouping variables
 #' @param k vector of number of clusters to run through
 #' @export
-#' @example man-roxygen/ex-clust.R
+#' @example man-roxygen/ex-clust-norun.R
 #' @importFrom purrr by_row
 #' @importFrom LICORS kmeanspp
 get_kmeans <- function(dat, x, y, groups = NULL, k = 2:20) {
@@ -52,7 +52,7 @@ get_kmeans <- function(dat, x, y, groups = NULL, k = 2:20) {
 #'
 #' @param x object obtained from \code{\link{get_kmeans}}
 #' @param log plot the y-axis on the log scale?
-#' @example man-roxygen/ex-clust.R
+#' @example man-roxygen/ex-clust-norun.R
 #' @export
 plot_scree <- function(x, log = FALSE) {
   if (!inherits(x, "sc_kmeans"))
@@ -97,7 +97,7 @@ join_data_with_cluster <- function(x, k) {
 #' @param use_median should median be used instead of mean to compute the centroid?
 #' @param \ldots additional parameters passed on to \code{\link{xyplot}}
 #' @export
-#' @example man-roxygen/ex-clust.R
+#' @example man-roxygen/ex-clust-norun.R
 #' @importFrom tidyr unnest
 plot_clust <- function(x, k, centroid = TRUE, xlab = NULL, ylab = NULL, alpha = 0.3,
   use_median = FALSE, ...) {
@@ -110,7 +110,7 @@ plot_clust <- function(x, k, centroid = TRUE, xlab = NULL, ylab = NULL, alpha = 
     dplyr::mutate(cluster2 = paste0(cluster_name, " (n=", size, ")"))
     # %>%
     # group_by(id) %>% do({
-    #   tmp <- tail(., 1); tmp$x <- NA; tmp$y <- NA
+    #   tmp <- utils::tail(., 1); tmp$x <- NA; tmp$y <- NA
     #   rbind(., tmp)
     # })
 
@@ -165,10 +165,103 @@ get_centroid_data <- function(x, k, use_median = FALSE) {
 
   fn <- ifelse(use_median, median, mean)
 
-  dat %>%
+  res <- dat %>%
     dplyr::group_by_("cluster", "cluster_name", "x") %>%
     dplyr::summarise(y = fn(y, na.rm = TRUE)) %>%
-    rename_(.dots = c(setNames("x", x$x), setNames("y", x$y)))
+    rename_(.dots = c(setNames("x", x$x), setNames("y", x$y))) %>%
+    dplyr::ungroup()
+
+  attr(res, "xyvars") <- list(x = x$x, y = x$y)
+  class(res) <- c("sc_centroids", class(res))
+
+  res
+}
+
+#' Compute the centroids for a given clustering
+#'
+#' @param cents object obtained from \code{\link{get_centroid_data}}
+#' @param heat object obtained from \code{\link{plot_heat}}
+#' @param xlab,ylab axis labels (if NULL, will use variable name)
+#' @param mod a function that can modify the resulting ggplot before it is printed
+#' @export
+plot_centroid_groups <- function(cents, heat, xlab = NULL, ylab = NULL, mod = identity) {
+  if (!inherits(cents, "sc_centroids"))
+    stop("Argument 'cents' must come from get_centroid_data()")
+  if (!inherits(heat, "pheatmap_plot"))
+    stop("Argument 'heat' must come from plot_heat(..., interactive = FALSE, ...)")
+
+  gps <- heat$cluster_groups
+  if (is.null(gps))
+    stop("Argument 'heat' must come from plot_heat() with 'annotation_labs' set")
+
+  if (length(unique(cents$cluster_name)) != nrow(gps))
+    stop("Arguments 'cents' and 'heat' must come from objects with the same number of centroids")
+
+  if (is.integer(cents$cluster_name))
+    gps$cluster_name <- as.integer(gps$cluster_name)
+  dat <- dplyr::left_join(cents, gps)
+
+  xyvars <- attr(cents, "xyvars")
+
+  if (is.null(xlab))
+    xlab <- xyvars$x
+  if (is.null(ylab))
+    ylab <- xyvars$y
+
+  tail1 <- function(x) utils::tail(x, 1)
+  dat_lab <- data.frame(dat) %>%
+    dplyr::group_by(cluster_name) %>%
+    dplyr::summarise_all(tail1)
+
+  rng <- diff(range(dat[[xyvars$x]], na.rm = TRUE))
+  p <- ggplot2::ggplot(dat, ggplot2::aes_string(
+    x = xyvars$x, y = xyvars$y, group = "cluster_name")) +
+    ggplot2::geom_line(size = 1, alpha = 0.9) +
+    ggplot2::geom_text(ggplot2::aes_string(x = xyvars$x, y = xyvars$y, group = "cluster_name",
+      label = "cluster_name"), data = dat_lab, nudge_x = 0.05 * rng, size = 6)  +
+    ggplot2::theme_bw(base_size = 18) +
+    ggplot2::facet_wrap("group", nrow = 1) +
+    ggplot2::xlab(xlab) +
+    ggplot2::ylab(ylab)
+
+  p <- mod(p)
+
+  dm <- ggplot2::ggplot(dat, ggplot2::aes_string(
+    x = xyvars$x, y = xyvars$y, group = "cluster_name")) +
+    ggplot2::facet_wrap("group", nrow = 1) +
+    ggplot2::geom_rect(ggplot2::aes_string(fill = "group"),
+      xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf) +
+    ggplot2::theme_minimal(base_size = 18)
+
+  g1 <- ggplot2::ggplotGrob(p)
+  g2 <- ggplot2::ggplotGrob(dm)
+
+  gtable_select <- function (x, ...) {
+    matches <- c(...)
+    x$layout <- x$layout[matches,, drop = FALSE] # nolint
+    x$grobs <- x$grobs[matches]
+    x
+  }
+
+  panels <- grepl(pattern = "panel", g2$layout$name)
+  strips <- grepl(pattern = "strip-t", g2$layout$name)
+  g2$layout$t[panels] <- g2$layout$t[panels] - 1
+  g2$layout$b[panels] <- g2$layout$b[panels] - 1
+
+  new_strips <- gtable_select(g2, panels | strips)
+  # grid.newpage()
+  # grid.draw(new_strips)
+
+  gtable_stack <- function(g1, g2) {
+    g1$grobs <- c(g1$grobs, g2$grobs)
+    g1$layout <- transform(g1$layout, z = z - max(z), name = "g2")
+    g1$layout <- rbind(g1$layout, g2$layout)
+    g1
+  }
+
+  new_plot <- gtable_stack(g1, new_strips)
+  grid::grid.newpage()
+  grid::grid.draw(new_plot)
 }
 
 # plot_centroids <- function(dat, km) {
@@ -179,4 +272,3 @@ get_centroid_data <- function(x, k, use_median = FALSE) {
 #     bind_rows()
 
 # }
-

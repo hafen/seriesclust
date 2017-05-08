@@ -10,7 +10,7 @@
 #' @param annotation_labs a vector of labels to use to annotate column groupings if using \code{\link[pheatmap]{pheatmap}}
 #' @param \ldots parameters passed on to \code{\link[d3heatmap]{d3heatmap}} or \code{\link[pheatmap]{pheatmap}}
 #' @export
-#' @example man-roxygen/ex-clust.R
+#' @example man-roxygen/ex-clust-norun.R
 #' @importFrom tidyr crossing_
 #' @importFrom d3heatmap d3heatmap
 #' @importFrom pheatmap pheatmap

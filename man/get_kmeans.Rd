@@ -21,14 +21,14 @@ get_kmeans(dat, x, y, groups = NULL, k = 2:20)
 Get a set k-means++ clusters for a collection of series
 }
 \examples{
-\dontrun{
 library(dplyr)
 
 # scale the monthly median close price so that we are clustering on general shape
 d <- nasd16 \%>\%
   group_by(symbol) \%>\%
-  mutate(close_scl = scale(med_close)) \%>\%
-  select(-company, -med_close)
+  mutate(close_scl = as.numeric(scale(med_close))) \%>\%
+  select(-company, -med_close) \%>\%
+  ungroup()
 
 set.seed(1234)
 # k-means clustering with 2, 5, and 9 clusters
@@ -41,5 +41,4 @@ plot_heat(km, 9, col = "industry", interactive = FALSE,
   display_numbers = TRUE, cutree_cols = 3, cutree_rows = 3,
   annotation_labs = c("A", "B", "C"))
 plot_heat(km, 9, col = "industry", cutoff = 20)
-}
 }

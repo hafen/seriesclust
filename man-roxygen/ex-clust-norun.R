@@ -1,3 +1,4 @@
+\dontrun{
 library(dplyr)
 
 # scale the monthly median close price so that we are clustering on general shape
@@ -23,3 +24,4 @@ heat
 
 cents <- get_centroid_data(km, 9)
 plot_centroid_groups(cents, heat)
+}

@@ -3,6 +3,7 @@
 S3method(print,pheatmap_plot)
 export(get_centroid_data)
 export(get_kmeans)
+export(plot_centroid_groups)
 export(plot_clust)
 export(plot_heat)
 export(plot_scree)
