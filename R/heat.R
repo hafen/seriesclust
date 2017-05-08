@@ -106,8 +106,6 @@ plot_heat <- function(x, k, col, cutoff = 1, color = viridis::magma,
         acol <- data.frame(group = annotation_labs[tmp2], stringsAsFactors = FALSE)
         rownames(acol) <- names(tmp)
         pars$annotation_col <- acol
-        tableau10 <- c("#1F77B4", "#FF7F0E", "#2CA02C", "#D62728", "#9467BD",
-          "#8C564B", "#E377C2", "#7F7F7F", "#BCBD22", "#17BECF")
         cols <- tableau10[(seq_along(annotation_labs) - 1) %% 10 + 1]
         names(cols) <- annotation_labs
         pars$annotation_colors <- list(group = cols)

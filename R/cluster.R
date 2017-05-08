@@ -199,7 +199,7 @@ plot_centroid_groups <- function(cents, heat, xlab = NULL, ylab = NULL, mod = id
 
   if (is.integer(cents$cluster_name))
     gps$cluster_name <- as.integer(gps$cluster_name)
-  dat <- dplyr::left_join(cents, gps)
+  dat <- suppressMessages(dplyr::left_join(cents, gps))
 
   xyvars <- attr(cents, "xyvars")
 
@@ -213,24 +213,31 @@ plot_centroid_groups <- function(cents, heat, xlab = NULL, ylab = NULL, mod = id
     dplyr::group_by(cluster_name) %>%
     dplyr::summarise_all(tail1)
 
-  rng <- diff(range(dat[[xyvars$x]], na.rm = TRUE))
+  rng <- range(dat[[xyvars$x]], na.rm = TRUE)
+  drng <- diff(rng)
   p <- ggplot2::ggplot(dat, ggplot2::aes_string(
     x = xyvars$x, y = xyvars$y, group = "cluster_name")) +
     ggplot2::geom_line(size = 1, alpha = 0.9) +
-    ggplot2::geom_text(ggplot2::aes_string(x = xyvars$x, y = xyvars$y, group = "cluster_name",
-      label = "cluster_name"), data = dat_lab, nudge_x = 0.05 * rng, size = 6)  +
+    ggrepel::geom_label_repel(ggplot2::aes_string(x = xyvars$x, y = xyvars$y,
+      group = "cluster_name", label = "cluster_name"), data = dat_lab, nudge_x = 0.08 * drng,
+      segment.color = ggplot2::alpha("black", 0.3), size = 4)  +
+    # ggplot2::geom_text(ggplot2::aes_string(x = xyvars$x, y = xyvars$y, group = "cluster_name",
+    #   label = "cluster_name"), data = dat_lab, nudge_x = 0.05 * drng, size = 6)  +
     ggplot2::theme_bw(base_size = 18) +
     ggplot2::facet_wrap("group", nrow = 1) +
     ggplot2::xlab(xlab) +
-    ggplot2::ylab(ylab)
+    ggplot2::ylab(ylab) +
+    ggplot2::xlim(rng + c(-0.04, 0.12) * drng)
 
   p <- mod(p)
 
+  ## stuff to color strip labels according to group
   dm <- ggplot2::ggplot(dat, ggplot2::aes_string(
     x = xyvars$x, y = xyvars$y, group = "cluster_name")) +
     ggplot2::facet_wrap("group", nrow = 1) +
     ggplot2::geom_rect(ggplot2::aes_string(fill = "group"),
       xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf) +
+    ggplot2::scale_fill_manual(values = tableau10) +
     ggplot2::theme_minimal(base_size = 18)
 
   g1 <- ggplot2::ggplotGrob(p)

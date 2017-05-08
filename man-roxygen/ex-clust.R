@@ -22,4 +22,5 @@ heat <- plot_heat(km, 9, col = "sector", interactive = FALSE,
 heat
 
 cents <- get_centroid_data(km, 9)
+
 plot_centroid_groups(cents, heat)

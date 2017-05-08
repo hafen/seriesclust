@@ -18,7 +18,8 @@ Imports:
     tidyr,
     magrittr,
     pheatmap,
-    ggplot2
+    ggplot2,
+    ggrepel
 Suggests:
     testthat,
     covr,

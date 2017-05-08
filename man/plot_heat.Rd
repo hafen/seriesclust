@@ -31,6 +31,7 @@ plot_heat(x, k, col, cutoff = 1, color = viridis::magma,
 Plot heat map of variable distributions within each cluster
 }
 \examples{
+\dontrun{
 library(dplyr)
 
 # scale the monthly median close price so that we are clustering on general shape
@@ -47,8 +48,14 @@ plot_scree(km)
 plot_heat(km, 9, col = "sector")
 plot_heat(km, 9, col = "sector", interactive = FALSE,
   display_numbers = TRUE, cutree_cols = 3, cutree_rows = 3)
-plot_heat(km, 9, col = "industry", interactive = FALSE,
+plot_heat(km, 9, col = "industry", cutoff = 20)
+
+heat <- plot_heat(km, 9, col = "sector", interactive = FALSE,
   display_numbers = TRUE, cutree_cols = 3, cutree_rows = 3,
   annotation_labs = c("A", "B", "C"))
-plot_heat(km, 9, col = "industry", cutoff = 20)
+heat
+
+cents <- get_centroid_data(km, 9)
+plot_centroid_groups(cents, heat)
+}
 }
