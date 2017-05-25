@@ -7,7 +7,6 @@
 #' @param k vector of number of clusters to run through
 #' @export
 #' @example man-roxygen/ex-clust-norun.R
-#' @importFrom purrr by_row
 #' @importFrom LICORS kmeanspp
 get_kmeans <- function(dat, x, y, groups = NULL, k = 2:20) {
   res <- list(kmeans = list())

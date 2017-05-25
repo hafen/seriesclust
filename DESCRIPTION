@@ -13,7 +13,6 @@ Imports:
     dplyr,
     lattice,
     d3heatmap,
-    purrr,
     rbokeh,
     tidyr,
     magrittr,
